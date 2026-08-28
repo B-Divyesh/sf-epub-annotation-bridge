@@ -82,6 +82,9 @@ jobs:
           mkdir publish-assets
           find release-assets -type f \( -name '*.AppImage' -o -name '*.deb' -o -name '*.dmg' -o -name '*.msi' \) \
             -exec cp -t publish-assets {} +
+          while IFS= read -r -d '' asset; do
+            mv "$asset" "${asset// /.}"
+          done < <(find publish-assets -maxdepth 1 -type f -name '* *' -print0)
           (cd publish-assets && sha256sum -- * > SHA256SUMS)
           TAG="${GITHUB_REF_NAME:-v0.1.0}"
           jq -n --arg version "$TAG" --arg base "https://github.com/${GITHUB_REPOSITORY}/releases/download/$TAG" \
