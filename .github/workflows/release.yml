@@ -1,0 +1,89 @@
+name: Release desktop apps
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            label: linux-x64
+            bundles: appimage,deb
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            label: windows-x64
+            bundles: msi
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            label: macos-arm64
+            bundles: dmg
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            label: macos-x64
+            bundles: dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: dtolnay/rust-toolchain@stable
+        with: { targets: '${{ matrix.target }}' }
+      - uses: swatinem/rust-cache@v2
+        with: { workspaces: src-tauri }
+      - name: Install Linux packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - run: npm ci
+      - run: npm run test:unit
+      - run: cargo test --manifest-path src-tauri/Cargo.toml
+      - name: Build bundles
+        uses: tauri-apps/tauri-action@v0
+        with:
+          args: --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epub-annotation-bridge-${{ matrix.label }}
+          path: src-tauri/target/${{ matrix.target }}/release/bundle/**/*
+          if-no-files-found: error
+
+  release:
+    needs: [verify, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: release-assets, merge-multiple: true }
+      - name: Prepare manifests
+        shell: bash
+        run: |
+          find release-assets -mindepth 2 -type f -exec mv -t release-assets {} +
+          find release-assets -mindepth 1 -type d -empty -delete
+          (cd release-assets && sha256sum * > SHA256SUMS)
+          TAG="${GITHUB_REF_NAME:-v0.1.0}"
+          jq -n --arg version "$TAG" --arg base "https://github.com/${GITHUB_REPOSITORY}/releases/download/$TAG" \
+            --argjson files "$(find release-assets -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' | jq -R . | jq -s .)" \
+            '{version:$version,assets:[$files[]|{name:.,url:($base+"/"+.)}]}' > release-assets/latest.json
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
+          draft: false

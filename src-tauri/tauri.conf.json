@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "EPUB Annotation Bridge",
+  "version": "0.1.0",
+  "identifier": "in.sociobot.epub-annotation-bridge",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:5173",
+    "beforeBuildCommand": "npm run build:site",
+    "frontendDist": "../dist/site"
+  },
+  "app": {
+    "windows": [{ "title": "EPUB Annotation Bridge", "width": 1280, "height": 820, "minWidth": 390, "minHeight": 640 }],
+    "security": { "csp": "default-src 'self' asset: http://asset.localhost; img-src 'self' asset: http://asset.localhost data:; style-src 'self'; script-src 'self'; connect-src 'self' https://api.sociobot.in https://api.github.com" }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["dmg", "msi", "appimage", "deb"],
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
+    "shortDescription": "Move EPUB notes between readers",
+    "longDescription": "Imports KOReader and Kobo annotations into a portable book-CFI ledger."
+  }
+}
