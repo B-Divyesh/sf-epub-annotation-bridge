@@ -58,7 +58,9 @@ Prompt:
 
 > Use case: stylized-concept. Asset type: landing-page editorial hero. A high-contrast black-and-ivory linocut editorial illustration of two open, generic unbranded e-readers on a typesetter's worktable. Narrow paper annotation slips travel between the devices and gather into a neat ledger. Overhead three-quarter view, asymmetric newspaper composition, visible paper grain, crisp carved ink hatching, sparse oxblood-red proofreader marks only, generous quiet margin, no people. Warm newsprint, black ink, restrained red accent. No readable text, no letters, no logos, no trademarks, no watermark, no gradients, no glossy 3D, no blue, no interface screenshot.
 
-Provenance: generated for this product with the Param Factory Azure image deployment (`factory-image`) on 2026-08-28. The selected image and prompt sidecar live in `assets/src/`. Generated imagery is original and used under the product's MIT distribution.
+Provenance: generated for this product with the Param Factory Azure image deployment (`factory-image`) on 2026-08-28. The selected image and prompt sidecar live in `assets/src/`. Generated imagery is original and used under the product's MIT distribution. Production crops ship as responsive AVIF and WebP, with a JPEG fallback; the 640px AVIF is 57 KB.
+
+The three walkthrough images are original screenshots of this app's empty transfer desk, matched annotation row, and export controls. They were captured locally from the production build on 2026-08-28 and optimized as WebP files in `public/assets/`.
 
 ## Responsive and accessibility policy
 

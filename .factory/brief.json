@@ -1,0 +1,11 @@
+{
+  "slug": "epub-annotation-bridge",
+  "title": "EPUB Annotation Bridge",
+  "summary": "Move EPUB highlights and notes between Calibre, KOReader, and Kobo through a local ledger.",
+  "artifact_class": "desktop-app",
+  "user": "Readers who sideload legal EPUBs and need highlights and notes to survive moving between Calibre-managed libraries and e-readers.",
+  "smallest_useful_product": "Desktop app that watches a Calibre library plus mounted reader, imports supported highlight stores into a book-CFI ledger, exports Markdown and JSON, and writes only safe sidecar files.",
+  "monetization": "one-time",
+  "constraints": "No DRM circumvention; support only documented or exportable reader data; preserve original files; handle copyrighted books entirely on device.",
+  "state": "BUILT"
+}
