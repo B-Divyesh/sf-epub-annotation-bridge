@@ -1,0 +1,9 @@
+{
+  "name": "EPUB Annotation Bridge",
+  "short_name": "EPUB Bridge",
+  "start_url": "/ledger",
+  "display": "standalone",
+  "background_color": "#f2efe7",
+  "theme_color": "#f2efe7",
+  "icons": [{"src":"/apple-touch-icon.png","sizes":"180x180","type":"image/png"}]
+}

@@ -1,0 +1,10 @@
+{
+  "navigationFallback": {"rewrite": "/index.html", "exclude": ["/assets/*", "/*.{svg,png,webp,js,css,json,xml,txt,sh,ps1}"]},
+  "globalHeaders": {
+    "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; connect-src 'self' https://api.github.com https://api.sociobot.in; object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-Content-Type-Options": "nosniff",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+  },
+  "mimeTypes": {".webmanifest":"application/manifest+json"}
+}

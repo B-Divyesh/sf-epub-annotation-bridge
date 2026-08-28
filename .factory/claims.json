@@ -1,0 +1,65 @@
+[
+  {
+    "id": "demo-sandbox",
+    "claim": "The sample ledger stays separate from the real ledger",
+    "where": "landing action and demo banner",
+    "test": "npm test -- --grep @claim:demo-sandbox",
+    "sandbox": "fresh browser context; open /demo; assert five rows, demo banner, and no real ledger key"
+  },
+  {
+    "id": "portable-export",
+    "claim": "Exports every note as Markdown and JSON",
+    "where": "landing, ledger toolbar, README",
+    "test": "npm test -- --grep @claim:portable-export",
+    "sandbox": "demo ledger; download both formats; assert five quotes and CFIs"
+  },
+  {
+    "id": "local-processing",
+    "claim": "Book text, highlights, and notes stay on this device",
+    "where": "landing, privacy, README",
+    "test": "npm test -- --grep @claim:local-processing",
+    "sandbox": "intercept the full demo flow and assert no cross-origin request"
+  },
+  {
+    "id": "offline-export",
+    "claim": "Saved ledgers and core exports work offline",
+    "where": "landing, README",
+    "test": "npm test -- --grep @claim:offline-export",
+    "sandbox": "load /demo once, set the browser offline, reload, and export JSON"
+  },
+  {
+    "id": "annotation-import",
+    "claim": "Imports KOReader Lua, Kobo CSV, and bridge JSON files",
+    "where": "landing steps, transfer desk, README",
+    "test": "npm run test:unit -- -t @claim:annotation-import",
+    "sandbox": "bundled KOReader, Kobo, and bridge ledger strings; assert one parsed record from each"
+  },
+  {
+    "id": "epub-quote-match",
+    "claim": "Finds an unmatched quote inside an EPUB chapter and adds a CFI",
+    "where": "landing steps and README",
+    "test": "npm run test:e2e -- --grep @claim:epub-quote-match --project=chromium",
+    "sandbox": "fresh browser context; generated one-chapter EPUB and Kobo CSV fixture"
+  },
+  {
+    "id": "safe-sidecar",
+    "claim": "Writes a new JSON sidecar without replacing an existing sidecar",
+    "where": "desktop export toolbar and README",
+    "test": "cargo test --manifest-path src-tauri/Cargo.toml claim_safe_sidecar_preserves_existing_file",
+    "sandbox": "temporary folder containing an existing sidecar; assert the next path and original contents"
+  },
+  {
+    "id": "folder-watcher",
+    "claim": "The desktop app watches selected Calibre and reader folders for changes",
+    "where": "landing price section, download page, README",
+    "test": "cargo test --manifest-path src-tauri/Cargo.toml claim_folder_watcher_reports_a_change",
+    "sandbox": "temporary watched folder; create a file and assert a filesystem event arrives"
+  },
+  {
+    "id": "license-verify",
+    "claim": "A valid one-time license activates the desktop folder tools",
+    "where": "landing price section, download page, README",
+    "test": "npm run test:e2e -- --grep @claim:license-verify --project=chromium",
+    "sandbox": "fresh browser context with a recorded valid Sociobot verification response"
+  }
+]
