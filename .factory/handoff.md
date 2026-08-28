@@ -43,6 +43,8 @@ Use `npm run tauri dev` for the desktop shell. Push a `v*` tag to run the releas
 - Lighthouse mobile: performance 97, accessibility 100, best practices 100, SEO 100.
 - Lighthouse lab metrics: FCP 0.90 s, LCP 2.33 s, total blocking time 145 ms, CLS 0.
 - `sh -n public/install.sh`: passed.
+- Release `v0.1.0`: published for macOS arm64/x64, Windows x64, and Linux x64 at https://github.com/B-Divyesh/sf-epub-annotation-bridge/releases/tag/v0.1.0.
+- Release verification: downloaded the published DEB and matched it against `SHA256SUMS`; `latest.json` is valid and lists all five installers.
 
 ## Storage and network behavior
 
@@ -54,7 +56,6 @@ Use `npm run tauri dev` for the desktop shell. Push a `v*` tag to run the releas
 
 ## Known gaps
 
-- The first public release assets appear only after the `v0.1.0` workflow completes. Until then, `/download` shows the release-page fallback without a console error.
 - Builds are unsigned. macOS users must right-click and choose Open; Windows shows its unsigned-app warning.
 - Generated CFIs are stable spine-and-text offsets for bridge round trips. They are not reader-vendor DOM range objects.
 - Folder watching requires a mounted filesystem path. Reader protocols that do not expose a filesystem are outside v1.
@@ -64,4 +65,3 @@ Use `npm run tauri dev` for the desktop shell. Push a `v*` tag to run the releas
 
 1. Register `epub-annotation-bridge` with the Sociobot billing API at $19 and set its return URL to the deployed `/download` route.
 2. Add signing when certificates are available. Expected macOS secrets: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. Expected Windows secrets: `WINDOWS_CERT_PFX` and `WINDOWS_CERT_PASSWORD`.
-3. Confirm the GitHub release assets, `SHA256SUMS`, and `latest.json` after the first tag workflow finishes.
