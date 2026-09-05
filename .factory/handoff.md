@@ -1,5 +1,13 @@
 # EPUB Annotation Bridge handoff
 
+## Independent verification on 2026-09-05
+
+Verification 1 is **FAIL** with 10 findings and 6 untested public claims. The implementation candidate is `15b660fd2b37dfe037ba5d004e86d870a2ea5d16` (`v0.1.0`); the documentation commit reviewed is `56bb4d269deabaabea04b40b055b9404d947d4d6`.
+
+The complete evidence and remediation list are in [`.factory/verification-1.md`](verification-1.md). The most urgent issue is that the public $19 checkout returns HTTP 404 because billing registration is still absent. Other findings cover broken note filtering, accessibility at 200% text size and keyboard/touch use, a moderate `fflate` advisory, incomplete and unlisted claim tests, missing Linux prerequisites, and the missing HTTP 404 status.
+
+All declared claim commands were run. Their command processes pass after installing the Linux packages used in CI, but three claim tests do not assert their full promised outcomes. The full suite still passes 4 unit, 16 browser, and 2 Rust tests; the build succeeds; live Lighthouse is 100/100/100/100; and the released DEB checksum and clean-profile launch were independently verified.
+
 ## What was built
 
 - A Tauri 2 desktop app with a Vite and TypeScript interface.
