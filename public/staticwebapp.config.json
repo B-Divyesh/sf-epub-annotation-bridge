@@ -1,15 +1,10 @@
 {
   "routes": [
     { "route": "/demo", "rewrite": "/index.html" },
-    { "route": "/demo/", "rewrite": "/index.html" },
     { "route": "/ledger", "rewrite": "/index.html" },
-    { "route": "/ledger/", "rewrite": "/index.html" },
     { "route": "/download", "rewrite": "/index.html" },
-    { "route": "/download/", "rewrite": "/index.html" },
     { "route": "/privacy", "rewrite": "/index.html" },
-    { "route": "/privacy/", "rewrite": "/index.html" },
-    { "route": "/terms", "rewrite": "/index.html" },
-    { "route": "/terms/", "rewrite": "/index.html" }
+    { "route": "/terms", "rewrite": "/index.html" }
   ],
   "responseOverrides": {
     "404": { "rewrite": "/404.html", "statusCode": 404 }
