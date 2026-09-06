@@ -7,7 +7,7 @@ This repair restores the reader’s job: keep highlights and notes portable when
 - Desktop implementation: `dc0838662343d18ee842134aaad47ea7f8e000ca` (`v0.1.2`).
 - Static-site routing implementation: `e7f0649f26d5d147955f43d1d5de3671945f2d82`, deployed to `https://epub-annotation-bridge.sociobot.in`.
 - Previous verification documentation: `07f9331586a317851dcb790bee4fcbf0c3cc0158`.
-- The final repair report commit is recorded after this handoff is committed; it does not change the deployed product.
+- Repair verification documentation: `009a093e8f68b52411d12b39c36ceddda0f0ad32`; this report-only commit does not change the deployed product.
 
 ## What changed
 
