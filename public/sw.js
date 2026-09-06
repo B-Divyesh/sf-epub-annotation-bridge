@@ -1,5 +1,5 @@
-const CACHE = 'epub-bridge-v1';
-const SHELL = ['/', '/demo', '/ledger', '/privacy', '/terms', '/favicon.svg', '/manifest.webmanifest'];
+const CACHE = 'epub-bridge-v2';
+const SHELL = ['/', '/demo', '/ledger', '/download', '/privacy', '/terms', '/favicon.svg', '/manifest.webmanifest'];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL))));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))));
 self.addEventListener('fetch', event => {

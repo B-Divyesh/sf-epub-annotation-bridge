@@ -46,20 +46,48 @@
     "claim": "Writes a new JSON sidecar without replacing an existing sidecar",
     "where": "desktop export toolbar and README",
     "test": "cargo test --manifest-path src-tauri/Cargo.toml claim_safe_sidecar_preserves_existing_file",
-    "sandbox": "temporary folder containing an existing sidecar; assert the next path and original contents"
+    "sandbox": "temporary folder containing an existing sidecar; write a second sidecar, assert its JSON is present, and assert the original contents remain unchanged"
   },
   {
     "id": "folder-watcher",
     "claim": "The desktop app watches selected Calibre and reader folders for changes",
     "where": "landing price section, download page, README",
     "test": "cargo test --manifest-path src-tauri/Cargo.toml claim_folder_watcher_reports_a_change",
-    "sandbox": "temporary watched folder; create a file and assert a filesystem event arrives"
+    "sandbox": "temporary Calibre metadata database and mounted-reader folder; assert Calibre scanning, create a Kobo database record, receive a watcher event, and assert the refreshed scan contains that annotation"
   },
   {
     "id": "license-verify",
     "claim": "A valid one-time license activates the desktop folder tools",
     "where": "landing price section, download page, README",
     "test": "npm run test:e2e -- --grep @claim:license-verify --project=chromium",
-    "sandbox": "fresh browser context with a recorded valid Sociobot verification response"
+    "sandbox": "fresh browser context with a recorded valid Sociobot verification response and the Tauri runtime marker; assert the unlocked desktop ledger shows Choose folders"
+  },
+  {
+    "id": "kobo-database-import",
+    "claim": "Reads documented Kobo database highlight records",
+    "where": "README supported paths",
+    "test": "cargo test --manifest-path src-tauri/Cargo.toml claim_kobo_database_import_reads_exportable_records",
+    "sandbox": "temporary mounted-reader folder with a bundled-schema KoboReader.sqlite record; assert its quote, source, and EPUB CFI"
+  },
+  {
+    "id": "installer-checksum",
+    "claim": "The macOS and Linux installer accepts a matching AppImage and refuses a changed one",
+    "where": "README install and release section, download page",
+    "test": "npm run test:unit -- -t @claim:installer-checksum",
+    "sandbox": "temporary command path with recorded GitHub-release responses, a matching fixture AppImage, and then a changed checksum; assert install only happens for the matching file"
+  },
+  {
+    "id": "release-fallback",
+    "claim": "The download page caches one release for one hour and shows a release-page fallback when GitHub is unavailable",
+    "where": "README install and release section",
+    "test": "npm test -- --grep @claim:release-fallback",
+    "sandbox": "fresh browser context with a recorded release response; reload to assert one request, clear the cache, abort the request, and assert the fallback link"
+  },
+  {
+    "id": "checkout-registration",
+    "claim": "Until Sociobot registers checkout, the app does not send visitors to a broken checkout URL",
+    "where": "landing price section, download page, README",
+    "test": "npm test -- --grep @claim:checkout-registration",
+    "sandbox": "fresh browser context; open the landing page, assert the registration state has no checkout link, and record no checkout request"
   }
 ]

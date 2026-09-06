@@ -176,28 +176,96 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rusqlite::params;
+    use std::{sync::mpsc, time::{Duration, SystemTime, UNIX_EPOCH}};
+
+    fn temp_root(label: &str) -> PathBuf {
+        let nonce = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let root = std::env::temp_dir().join(format!("epub-bridge-{label}-{}-{nonce}", std::process::id()));
+        fs::create_dir_all(&root).unwrap();
+        root
+    }
+
+    fn create_calibre_database(root: &Path) {
+        let database = root.join("metadata.db");
+        let connection = Connection::open(database).unwrap();
+        connection.execute_batch(
+            "CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT NOT NULL, path TEXT NOT NULL);
+             CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+             CREATE TABLE books_authors_link (book INTEGER NOT NULL, author INTEGER NOT NULL);",
+        ).unwrap();
+        connection.execute("INSERT INTO books (id, title, path) VALUES (1, ?1, ?2)", params!["Walden", "Walden (1)"]).unwrap();
+        connection.execute("INSERT INTO authors (id, name) VALUES (1, ?1)", params!["Henry David Thoreau"]).unwrap();
+        connection.execute("INSERT INTO books_authors_link (book, author) VALUES (1, 1)", []).unwrap();
+        drop(connection);
+        let book_folder = root.join("Walden (1)");
+        fs::create_dir_all(&book_folder).unwrap();
+        fs::write(book_folder.join("Walden.epub"), "fixture").unwrap();
+    }
+
+    fn create_kobo_database(root: &Path, quote: &str) {
+        let kobo = root.join(".kobo");
+        fs::create_dir_all(&kobo).unwrap();
+        let connection = Connection::open(kobo.join("KoboReader.sqlite")).unwrap();
+        connection.execute_batch(
+            "CREATE TABLE Bookmark (
+              BookmarkID TEXT, VolumeID TEXT, Text TEXT, Annotation TEXT,
+              DateCreated TEXT, ContentID TEXT, Hidden TEXT
+            );",
+        ).unwrap();
+        connection.execute(
+            "INSERT INTO Bookmark (BookmarkID, VolumeID, Text, Annotation, DateCreated, ContentID, Hidden)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            params!["bookmark-1", "file:///mnt/onboard/Walden.epub", quote, "A practical note", "2026-09-06T12:00:00Z", "OPS/chapter.xhtml#epubcfi(/6/4!/4/1:0)", "false"],
+        ).unwrap();
+    }
+
     #[test]
     fn claim_safe_sidecar_preserves_existing_file() {
-        let root = std::env::temp_dir().join(format!("epub-bridge-test-{}", std::process::id()));
-        fs::create_dir_all(&root).unwrap();
+        let root = temp_root("sidecar-test");
         let original = root.join("epub-annotations.sidecar.json");
         fs::write(&original, "original").unwrap();
-        let next = safe_sidecar_path(&root).unwrap();
+        let written = write_sidecar(root.display().to_string(), "{\"annotations\":[]}".into()).unwrap();
+        let next = PathBuf::from(written);
         assert!(next.ends_with("epub-annotations.sidecar-2.json"));
+        assert_eq!(fs::read_to_string(next).unwrap(), "{\"annotations\":[]}");
         assert_eq!(fs::read_to_string(original).unwrap(), "original");
         let _ = fs::remove_dir_all(root);
     }
 
     #[test]
     fn claim_folder_watcher_reports_a_change() {
-        use std::{sync::mpsc, time::Duration};
-        let root = std::env::temp_dir().join(format!("epub-bridge-watch-test-{}", std::process::id()));
-        fs::create_dir_all(&root).unwrap();
+        let root = temp_root("watch-test");
+        let calibre = root.join("calibre");
+        let reader = root.join("reader");
+        fs::create_dir_all(&calibre).unwrap();
+        fs::create_dir_all(&reader).unwrap();
+        create_calibre_database(&calibre);
+        let first_scan = scan_sources(calibre.display().to_string(), reader.display().to_string()).unwrap();
+        assert_eq!(first_scan.books.len(), 1);
+        assert!(first_scan.books[0].path.ends_with("Walden.epub"));
+        assert!(first_scan.annotations.is_empty());
         let (sender, receiver) = mpsc::channel();
-        let _watcher = watch_directory(&root, move |event| { let _ = sender.send(event); }).unwrap();
-        fs::write(root.join("new-note.txt"), "changed").unwrap();
+        let _watcher = watch_directory(&reader, move |event| { let _ = sender.send(event); }).unwrap();
+        create_kobo_database(&reader, "A watched Kobo highlight.");
         let event = receiver.recv_timeout(Duration::from_secs(5)).expect("watcher event");
         assert!(event.is_ok());
+        let refreshed = scan_sources(calibre.display().to_string(), reader.display().to_string()).unwrap();
+        assert_eq!(refreshed.books.len(), 1);
+        assert_eq!(refreshed.annotations.len(), 1);
+        assert_eq!(refreshed.annotations[0].quote, "A watched Kobo highlight.");
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn claim_kobo_database_import_reads_exportable_records() {
+        let root = temp_root("kobo-import-test");
+        create_kobo_database(&root, "A Kobo database highlight.");
+        let annotations = scan_kobo(&root);
+        assert_eq!(annotations.len(), 1);
+        assert_eq!(annotations[0].source, "Kobo");
+        assert_eq!(annotations[0].quote, "A Kobo database highlight.");
+        assert_eq!(annotations[0].cfi, "epubcfi(/6/4!/4/1:0)");
         let _ = fs::remove_dir_all(root);
     }
 }

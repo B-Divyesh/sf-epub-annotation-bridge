@@ -1,0 +1,1 @@
+Move EPUB highlights and notes between Calibre, KOReader, and Kobo in a local ledger.

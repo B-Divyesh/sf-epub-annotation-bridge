@@ -26,7 +26,12 @@ The app does not remove DRM, edit EPUB files, sell books, or provide cloud sync.
 
 ## Develop and verify
 
-Requirements: Node.js 22, npm, and Rust stable for desktop work.
+Requirements: Node.js 22, npm, and Rust stable for desktop work. On Ubuntu or Debian, install the native desktop prerequisites first:
+
+```sh
+sudo apt-get update
+sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+```
 
 ```sh
 npm ci
@@ -48,9 +53,9 @@ The browser demo and unit fixtures make every public claim testable without an a
 
 ## Install and release
 
-The download page detects macOS, Windows, or Linux and reads release data from GitHub's CORS-enabled API. It keeps a one-hour local cache and shows a release-page fallback when offline.
+The download page detects macOS, Windows, or Linux and reads release data from GitHub's CORS-enabled API. It caches one release for one hour. If GitHub is unavailable, it shows a release-page link.
 
-One-line installers verify `SHA256SUMS` before installing:
+The macOS and Linux installer accepts a matching AppImage and refuses a changed one:
 
 ```sh
 curl -fsSL https://epub-annotation-bridge.sociobot.in/install.sh | sh
@@ -64,7 +69,7 @@ Tags matching `v*` run `.github/workflows/release.yml`. The workflow tests the s
 
 ## License unlock
 
-The free ledger includes file imports and every export. A $19 one-time license activates selected-folder watching in the desktop app. Checkout and verification use the Sociobot billing API. No payment provider is embedded in this repository.
+The free ledger includes file imports and every export. A $19 one-time license activates selected-folder watching in the desktop app. Checkout is being registered with Sociobot; until registration finishes, the app does not send visitors to checkout. License verification uses the Sociobot billing API. No payment provider is embedded in this repository.
 
 License tokens use `localStorage` key `sb_license:epub-annotation-bridge`. Verification results are cached for one day. The free experience never waits for a license request.
 
