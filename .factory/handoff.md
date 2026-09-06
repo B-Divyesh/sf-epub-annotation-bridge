@@ -1,30 +1,78 @@
 # EPUB Annotation Bridge handoff
 
-## Independent verification on 2026-09-05
+## Status on 2026-09-06
 
-Verification 1 is **FAIL** with 10 findings and 6 untested public claims. The implementation candidate is `15b660fd2b37dfe037ba5d004e86d870a2ea5d16` (`v0.1.0`); the documentation commit reviewed is `56bb4d269deabaabea04b40b055b9404d947d4d6`.
+This repair restores the reader’s job: keep highlights and notes portable when moving legal EPUBs between Calibre, KOReader, and Kobo.
 
-The complete evidence and remediation list are in [`.factory/verification-1.md`](verification-1.md). The most urgent issue is that the public $19 checkout returns HTTP 404 because billing registration is still absent. Other findings cover broken note filtering, accessibility at 200% text size and keyboard/touch use, a moderate `fflate` advisory, incomplete and unlisted claim tests, missing Linux prerequisites, and the missing HTTP 404 status.
+- Desktop implementation: `dc0838662343d18ee842134aaad47ea7f8e000ca` (`v0.1.2`).
+- Static-site routing implementation: `e7f0649f26d5d147955f43d1d5de3671945f2d82`, deployed to `https://epub-annotation-bridge.sociobot.in`.
+- Previous verification documentation: `07f9331586a317851dcb790bee4fcbf0c3cc0158`.
+- The final repair report commit is recorded after this handoff is committed; it does not change the deployed product.
 
-All declared claim commands were run. Their command processes pass after installing the Linux packages used in CI, but three claim tests do not assert their full promised outcomes. The full suite still passes 4 unit, 16 browser, and 2 Rust tests; the build succeeds; live Lighthouse is 100/100/100/100; and the released DEB checksum and clean-profile launch were independently verified.
+## What changed
 
-## What was built
+- Removed the $19 checkout link while Sociobot billing registration is unavailable. The price and paid folder tools remain described, but visitors now see an honest registration notice instead of a known HTTP 404. Public offer metadata is at `/work/.evidence/billing-offer.json` for the billing-registration operator.
+- Fixed ledger filtering by hiding nonmatching rows, announcing the matching count, and explaining an empty result.
+- Made the narrow layout work at 200% text size. Keyboard focus now reaches the file chooser through its visible label, and navigation, demo, reset, and footer controls meet the 44px touch-target floor.
+- Updated `fflate` to 0.8.3 and reject malformed EPUB archives with a recovery path.
+- Replaced partial native claim checks with outcome checks for collision-safe sidecars, a Calibre plus Kobo watcher refresh, and a Kobo SQLite import. The license claim now tests the unlocked Tauri control rather than a browser-only surrogate.
+- Added outcome claims for Kobo database import, POSIX installer SHA-256 refusal, one-hour release cache/fallback, and the unavailable checkout state.
+- Documented the exact Debian/Ubuntu desktop prerequisites. A clean checkout can now run the stated native command after installing them.
+- Replaced the SPA fallback with explicit app-route rewrites and a custom `404.html` response override. `/demo`, `/privacy`, `/download`, and `/terms` return 200; unknown routes return the designed page with HTTP 404.
+- Made the POSIX installer test skip only on Windows runners, where `install.ps1` is the supported installer. The POSIX outcome is still exercised in Linux verification.
 
-- A Tauri 2 desktop app with a Vite and TypeScript interface.
-- A local annotation ledger for KOReader Lua, Kobo CSV or database records, and bridge JSON.
-- EPUB spine reading, quote matching, chapter recovery, and portable EPUB CFI records.
-- Markdown and JSON export in the free tier.
-- Collision-safe JSON sidecar writing that never replaces an existing sidecar.
-- Paid Calibre and mounted-reader folder scanning and live change watching.
-- Sociobot checkout, returned-token capture, daily license verification, offline cached verdicts, and license restore.
-- An isolated `/demo` with five public-domain highlights and separate `sessionStorage`.
-- Real `/`, `/demo`, `/ledger`, `/download`, `/privacy`, `/terms`, and styled 404 routes.
-- A monochrome broadsheet visual system, original generated hero art, and three app screenshot walkthrough frames.
-- Responsive AVIF and WebP art with a JPEG fallback, PWA shell caching, metadata, sitemap, robots, security headers, and app icons.
-- OS-aware GitHub release downloads plus checksum-verifying shell and PowerShell installers.
-- A tag-driven GitHub Actions matrix for macOS arm64 and x64, Windows x64, and Linux x64 bundles.
+## Verification
 
-## Run and deploy
+Clean checkout verification used a new clone of `main`, then ran:
+
+```sh
+npm ci
+npm test
+npm run build
+cargo test --manifest-path src-tauri/Cargo.toml
+```
+
+Before the Rust command, the documented prerequisites were installed:
+
+```sh
+sudo apt-get update
+sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+```
+
+Results:
+
+- `npm test`: 5 Vitest tests and 24 Playwright tests passed.
+- `cargo test --manifest-path src-tauri/Cargo.toml`: 3 native outcome tests passed.
+- All 13 commands declared in `.factory/claims.json` passed from that clean checkout.
+- `npm run build`: passed. Entry JavaScript is 36.50 KB raw / 14.27 KB gzip; CSS is 15.28 KB raw / 4.27 KB gzip.
+- `npm audit --omit=dev --json`: zero vulnerabilities.
+- `sh -n public/install.sh`: passed.
+- GitHub Actions release `v0.1.2`: verify, Linux AppImage/DEB, Windows MSI, macOS x64 DMG, and macOS arm64 DMG jobs all passed. The published `latest.json` names all five installers.
+- Consumer artifact: the published Linux DEB matched `SHA256SUMS`, extracted in a clean temporary package tree, and stayed running under a virtual display. The live download page detected Linux and linked to its real v0.1.2 AppImage with no console error.
+- Live `verify-url.sh`: 200, no browser console errors, `lang=en`, title, one h1, main landmark, and no missing image alt text.
+- Live Playwright axe scan: zero serious or critical findings on `/`, `/demo`, `/download`, `/privacy`, `/terms`, and an unknown route.
+- Live Lighthouse: performance 99, accessibility 100, best practices 100, SEO 100.
+- Fresh desktop and 390px-phone browser contexts each found, before scrolling: job “Move EPUB notes between readers”; audience “readers who move legal EPUBs between Calibre, KOReader, and Kobo”; first action “Try it with sample data”. Each sample loaded five notes, kept its persistent demo label after reset, and did not change a real-ledger marker.
+- Live route checks: `/`, `/demo`, `/privacy`, `/download`, and `/terms` returned 200. `/not-a-real-page` returned the product 404 page with status 404.
+
+Evidence is in `/work/.evidence/epub-annotation-bridge-repair-1-live`, including desktop and phone screenshots and the Lighthouse JSON report. The catalog description was copied to `/work/.evidence/catalog-description.txt`.
+
+## Finding disposition
+
+| Previous finding | Disposition |
+| --- | --- |
+| V1-01 checkout returned 404 | User-facing failure fixed by removing the broken link. Billing registration is still an external dependency; see below. |
+| V1-02 filtering | Fixed and browser-regressed. |
+| V1-03 200% mobile overflow | Fixed and tested at 390px with 32px root text. |
+| V1-04 file chooser focus | Fixed and keyboard-regressed. |
+| V1-05 small touch targets | Fixed and measured in browser tests. |
+| V1-06 vulnerable `fflate` | Fixed at 0.8.3; production audit is clean. |
+| V1-07 incomplete outcomes | Fixed with full native/desktop outcome assertions. |
+| V1-08 missing native prerequisites | Fixed in README and reproduced from a clean checkout. |
+| V1-09 HTTP 404 response | Fixed live; unknown pages return the designed 404 with status 404. |
+| V1-10 unlisted claims | Fixed: public Kobo, installer, release fallback, and checkout-registration claims are declared and outcome-tested. |
+
+## Run, build, and deploy
 
 ```sh
 npm ci
@@ -34,42 +82,25 @@ npm run build
 cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
-The exact static deploy command is `npm run build`. Deploy `dist/site`; its root contains `index.html`.
+Use `npm run tauri dev` for the desktop shell. The static output is `dist/site`. The product’s durable static deployment command is:
 
-Use `npm run tauri dev` for the desktop shell. Push a `v*` tag to run the release matrix.
+```sh
+/opt/fleet/lib/deploy-static.sh epub-annotation-bridge dist/site
+```
 
-## Verification completed on 2026-08-28
-
-- `npm test`: passed 4 Vitest unit tests and 16 Playwright tests.
-- Browser coverage: desktop Chromium and a 390px mobile Chromium profile.
-- Claim coverage: demo isolation, Markdown and JSON export, same-origin reading flow, offline reload and export, three import formats, EPUB quote matching, and license verification.
-- Accessibility: axe reported 0 serious or critical issues on all routes in both browser profiles. Keyboard skip navigation, empty and error states, one h1, landmarks, titles, mobile overflow, and console errors are tested.
-- `cargo test --manifest-path src-tauri/Cargo.toml`: passed 2 native tests for non-replacing sidecars and filesystem change events.
-- `npm run build`: passed. Initial app JavaScript is 35.83 KB raw / 13.98 KB gzip. CSS is 14.01 KB raw / 4.04 KB gzip.
-- Hero assets: 57 KB mobile AVIF, 62 KB mobile WebP, 214 KB desktop AVIF, 245 KB desktop WebP, and 279 KB JPEG fallback.
-- `npm audit`: 0 vulnerabilities.
-- Lighthouse mobile: performance 97, accessibility 100, best practices 100, SEO 100.
-- Lighthouse lab metrics: FCP 0.90 s, LCP 2.33 s, total blocking time 145 ms, CLS 0.
-- `sh -n public/install.sh`: passed.
-- Release `v0.1.0`: published for macOS arm64/x64, Windows x64, and Linux x64 at https://github.com/B-Divyesh/sf-epub-annotation-bridge/releases/tag/v0.1.0.
-- Release verification: downloaded the published DEB and matched it against `SHA256SUMS`; `latest.json` is valid and lists all five installers.
+Push a `v*` tag to build signed-status-independent desktop artifacts on GitHub Actions. `v0.1.2` is published with macOS arm64/x64 DMGs, a Windows x64 MSI, and Linux x64 AppImage/DEB assets at https://github.com/B-Divyesh/sf-epub-annotation-bridge/releases/tag/v0.1.2.
 
 ## Storage and network behavior
 
-- Real ledger: `localStorage` key `epub-bridge:ledger:v1`.
-- Demo ledger: `sessionStorage` key `demo:epub-bridge:ledger:v1`.
-- License: `localStorage` key `sb_license:epub-annotation-bridge`; only the token is sent to Sociobot for verification.
-- Download page: requests only public GitHub release metadata and caches it for one hour.
+- Real ledger: browser `localStorage` key `epub-bridge:ledger:v1`.
+- Demo ledger: `sessionStorage` key `demo:epub-bridge:ledger:v1`; reset and leaving demo discard it.
+- License: `localStorage` key `sb_license:epub-annotation-bridge`. Only that token may be sent to Sociobot for verification.
+- Download page: public GitHub release metadata only, cached for one hour; it shows a release-page fallback if unavailable.
 - No analytics, telemetry, third-party fonts, or runtime CDN scripts.
 
-## Known gaps
+## Known limits and operator action
 
-- Builds are unsigned. macOS users must right-click and choose Open; Windows shows its unsigned-app warning.
-- Generated CFIs are stable spine-and-text offsets for bridge round trips. They are not reader-vendor DOM range objects.
-- Folder watching requires a mounted filesystem path. Reader protocols that do not expose a filesystem are outside v1.
-- The app supports legal, unencrypted EPUBs only and does not bypass DRM.
-
-## Needs operator action
-
-1. Register `epub-annotation-bridge` with the Sociobot billing API at $19 and set its return URL to the deployed `/download` route.
-2. Add signing when certificates are available. Expected macOS secrets: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. Expected Windows secrets: `WINDOWS_CERT_PFX` and `WINDOWS_CERT_PASSWORD`.
+- Sociobot must register the existing one-time $19 offer before a checkout link can be enabled. Its exact public metadata is in `/work/.evidence/billing-offer.json`. Until then, paid folder watching is not purchasable; the free ledger, imports, and exports remain fully usable.
+- Builds are unsigned. macOS users must right-click and choose Open; Windows shows its unsigned-app warning. Signing needs `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`, `WINDOWS_CERT_PFX`, and `WINDOWS_CERT_PASSWORD` in the release environment.
+- Generated CFIs are stable bridge offsets for supported EPUB round trips, not vendor-specific DOM range objects.
+- Folder watching requires a mounted filesystem path. Reader protocols without a filesystem, DRM removal, reader firmware, cloud sync, and book sales are deliberately outside this product.
