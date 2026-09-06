@@ -60,7 +60,12 @@ esac
   });
 }
 
-describe("release installer", () => {
+// install.sh intentionally targets POSIX shells; Windows consumers use the
+// separately shipped install.ps1. Keep this outcome check on a POSIX runner
+// instead of requiring a shell that is not part of a Windows Node install.
+const describePosixInstaller = process.platform === "win32" ? describe.skip : describe;
+
+describePosixInstaller("release installer", () => {
   it("@claim:installer-checksum installs a matching AppImage and refuses a changed one", async () => {
     const root = await mkdtemp(join(tmpdir(), "epub-bridge-installer-"));
     const failureRoot = await mkdtemp(join(tmpdir(), "epub-bridge-installer-"));

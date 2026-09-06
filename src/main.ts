@@ -56,7 +56,7 @@ function header(): string {
 }
 
 function footer(): string {
-  return `<footer><p>Move EPUB notes between readers.</p><nav aria-label="Footer"><a href="/privacy" data-link>Privacy</a><a href="/terms" data-link>Terms</a><a href="https://hello-factory.sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external)</span></a></nav><p>v0.1.1 · Generated art disclosed in the design notes.</p></footer>`;
+  return `<footer><p>Move EPUB notes between readers.</p><nav aria-label="Footer"><a href="/privacy" data-link>Privacy</a><a href="/terms" data-link>Terms</a><a href="https://hello-factory.sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external)</span></a></nav><p>v0.1.2 · Generated art disclosed in the design notes.</p></footer>`;
 }
 
 const stamp = (text: string, kind = "") =>
@@ -135,7 +135,7 @@ function legal(kind: "privacy" | "terms"): string {
     <h2>What the app reads</h2><p>You choose each EPUB, annotation file, Calibre folder, or mounted-reader folder. The app does not read other folders.</p>
     <h2>What leaves the device</h2><p>No book text, highlight, note, or filename leaves your device. License checks send only the license token to Sociobot. The download page asks GitHub for public release details.</p>
     <h2>How to remove data</h2><p>Clear this site’s storage or remove the desktop app’s data folder. Demo data ends with its browser session.</p>`;
-  const terms = `<p class="kicker">Terms / v0.1.1</p><h1>Use the bridge with books you may read</h1><p>You may use the app with legal, unencrypted EPUBs and annotation data you can export or access.</p>
+  const terms = `<p class="kicker">Terms / v0.1.2</p><h1>Use the bridge with books you may read</h1><p>You may use the app with legal, unencrypted EPUBs and annotation data you can export or access.</p>
     <h2>No DRM removal</h2><p>The app does not bypass access controls. You are responsible for the files you choose.</p>
     <h2>One-time license</h2><p>The $19 purchase activates folder watching for one person. Sociobot is the merchant of record. Refunds revoke the license.</p>
     <h2>No warranty</h2><p>The software is provided as-is under the MIT License. Keep a backup before moving or deleting device files.</p>`;
@@ -143,7 +143,7 @@ function legal(kind: "privacy" | "terms"): string {
 }
 
 function downloadPage(): string {
-  return `${header()}<main id="main" class="download-page" tabindex="-1"><section><p class="kicker">Desktop app / v0.1.1</p><h1>Install the folder-watching desktop app</h1><p>Choose your platform. Builds are unsigned until the release certificates are added.</p><div id="download-state" class="download-state" aria-live="polite"><span class="loader">Checking the latest release…</span></div>
+  return `${header()}<main id="main" class="download-page" tabindex="-1"><section><p class="kicker">Desktop app / v0.1.2</p><h1>Install the folder-watching desktop app</h1><p>Choose your platform. Builds are unsigned until the release certificates are added.</p><div id="download-state" class="download-state" aria-live="polite"><span class="loader">Checking the latest release…</span></div>
     <div class="install-commands"><h2>Install from a terminal</h2><p>macOS or Linux</p><code>curl -fsSL https://epub-annotation-bridge.sociobot.in/install.sh | sh</code><p>Windows PowerShell</p><code>irm https://epub-annotation-bridge.sociobot.in/install.ps1 | iex</code><p class="fine">The macOS and Linux script accepts a matching AppImage and refuses a changed one.</p></div></section>
     <section id="license" class="license-box" aria-labelledby="license-title"><p class="section-label">License / one-time</p><h2 id="license-title">Add folder watching for $19</h2><p>The free app keeps file import and every export. The license adds live Calibre and mounted-reader folder watching.</p>
       ${checkoutPending()}<form id="license-form"><label for="license-token">Have a license? Paste it here</label><div><input id="license-token" name="license" autocomplete="off"><button class="button" type="submit">Verify license</button></div></form><p id="license-status" role="status">${escapeHtml(license.message)}</p><p class="fine">One-time purchase. Sociobot is the merchant of record. <a href="/terms" data-link>Read the terms.</a></p></section>
