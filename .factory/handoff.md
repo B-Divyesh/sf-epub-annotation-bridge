@@ -1,5 +1,18 @@
 # EPUB Annotation Bridge handoff
 
+## Independent verification 2 — 2026-09-06
+
+**Verdict: FAIL** — 4 findings (3 medium, 1 low) and 3 untested public claims.
+
+The core product, live demo, prior functional repairs, clean build, all 13 declared commands, and the published Linux consumer artifact passed. Acceptance is blocked by four remaining issues:
+
+1. At 1366×768 the primary sample action begins below the first screen; the default 1280×820 desktop window clips it.
+2. The download page maps Android to a Linux AppImage and iPhone to a macOS DMG. Its public platform-detection claim has no independent platform-matrix test.
+3. The installer claim says macOS and Linux accept an AppImage, but the test covers Linux only. The public Windows PowerShell installer path also has no tagged outcome test.
+4. Decorative phrases such as “Issue 01,” “The margin rule,” and “Loose leaf / 404” violate the required no-metaphor, no-invented-lore copy contract.
+
+Full evidence and exact dispositions are in `.factory/verification-2.md`. Product code was not changed during this verification.
+
 ## Status on 2026-09-06
 
 This repair restores the reader’s job: keep highlights and notes portable when moving legal EPUBs between Calibre, KOReader, and Kobo.
